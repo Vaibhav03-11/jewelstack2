@@ -1,9 +1,10 @@
+
 import React, { useState, useCallback } from 'react';
 import { predictDiamondPrice, getGoldRecommendation, generateStockingReport } from '../services/geminiService';
 
 const InsightCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div className="bg-jewel-bg-dark text-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-bold mb-4 text-jewel-gold">{title}</h2>
+    <div className="bg-brand-surface text-white p-4 rounded-lg shadow-lg">
+        <h2 className="text-lg font-bold mb-4 text-brand-gold">{title}</h2>
         {children}
     </div>
 );
@@ -12,10 +13,10 @@ const Button: React.FC<{ onClick: () => void; children: React.ReactNode; isLoadi
     <button
         onClick={onClick}
         disabled={isLoading}
-        className="w-full bg-jewel-gold text-jewel-navy font-bold py-2 px-4 rounded-lg hover:bg-jewel-gold-dark transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex justify-center items-center"
+        className="w-full bg-brand-gold text-brand-dark font-bold py-2.5 px-4 rounded-lg hover:bg-brand-gold-hover transition-colors disabled:bg-brand-text-secondary disabled:cursor-not-allowed flex justify-center items-center"
     >
         {isLoading ? (
-            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-brand-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -68,16 +69,16 @@ const MLInsightsScreen: React.FC = () => {
     }, []);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <InsightCard title="Diamond Price Prediction">
                 <div className="space-y-3">
                     <div>
-                        <label className="text-sm font-medium text-gray-300">Carat Weight: {carat.toFixed(1)}</label>
-                        <input type="range" min="0.5" max="5" step="0.1" value={carat} onChange={(e) => setCarat(parseFloat(e.target.value))} className="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer" />
+                        <label className="text-sm font-medium text-brand-text-secondary">Carat Weight: {carat.toFixed(1)}</label>
+                        <input type="range" min="0.5" max="5" step="0.1" value={carat} onChange={(e) => setCarat(parseFloat(e.target.value))} className="w-full h-2 bg-brand-border rounded-lg appearance-none cursor-pointer accent-brand-gold" />
                     </div>
                     <div>
-                        <label className="text-sm font-medium text-gray-300">Cut Quality</label>
-                        <select value={cut} onChange={(e) => setCut(e.target.value)} className="w-full bg-jewel-navy border border-jewel-gold rounded p-2 mt-1">
+                        <label className="text-sm font-medium text-brand-text-secondary">Cut Quality</label>
+                        <select value={cut} onChange={(e) => setCut(e.target.value)} className="w-full bg-brand-dark border border-brand-border rounded p-2 mt-1">
                             <option>Excellent</option>
                             <option>Very Good</option>
                             <option>Good</option>
@@ -88,7 +89,7 @@ const MLInsightsScreen: React.FC = () => {
                     {prediction.predictionText && (
                         <div className="bg-black/30 p-3 rounded-lg mt-4">
                             <p className="text-center font-bold text-2xl text-green-400">{prediction.predictionText}</p>
-                            <p className="text-center text-sm text-gray-300">{prediction.explanation}</p>
+                            <p className="text-center text-sm text-brand-text-secondary">{prediction.explanation}</p>
                         </div>
                     )}
                 </div>
@@ -98,14 +99,14 @@ const MLInsightsScreen: React.FC = () => {
                 <div className="space-y-3">
                     <div className="grid grid-cols-3 gap-2">
                         {['Ring', 'Necklace', 'Bangle'].map(type => (
-                            <button key={type} onClick={() => setOrnament(type)} className={`py-2 rounded ${ornament === type ? 'bg-jewel-gold text-jewel-navy' : 'bg-gray-700 text-white'}`}>{type}</button>
+                            <button key={type} onClick={() => setOrnament(type)} className={`py-2 rounded ${ornament === type ? 'bg-brand-gold text-brand-dark' : 'bg-brand-border text-white'}`}>{type}</button>
                         ))}
                     </div>
-                    <input type="text" value={purity} onChange={e => setPurity(e.target.value)} placeholder="Purity (e.g., 22K)" className="w-full bg-jewel-navy border border-jewel-gold rounded p-2" />
+                    <input type="text" value={purity} onChange={e => setPurity(e.target.value)} placeholder="Purity (e.g., 22K)" className="w-full bg-brand-dark border border-brand-border rounded p-2" />
                     <Button onClick={handleRecommendation} isLoading={isRecommending}>Get Recommendation</Button>
                     {recommendation && (
                          <div className="bg-black/30 p-3 rounded-lg mt-4">
-                            <p className="text-sm text-gray-200">{recommendation}</p>
+                            <p className="text-sm text-brand-text-primary">{recommendation}</p>
                         </div>
                     )}
                 </div>
@@ -113,11 +114,11 @@ const MLInsightsScreen: React.FC = () => {
 
             <InsightCard title="Historical Trends">
                 <div className="space-y-3">
-                    <p className="text-sm text-gray-300">Generate a smart stocking report based on market trends to optimize your inventory.</p>
+                    <p className="text-sm text-brand-text-secondary">Generate a smart stocking report based on market trends to optimize your inventory.</p>
                      <Button onClick={handleReport} isLoading={isReporting}>Generate Smart Stocking Report</Button>
                      {report && (
                          <div className="bg-black/30 p-3 rounded-lg mt-4 whitespace-pre-wrap">
-                            <p className="text-sm text-gray-200">{report}</p>
+                            <p className="text-sm text-brand-text-primary">{report}</p>
                         </div>
                     )}
                 </div>

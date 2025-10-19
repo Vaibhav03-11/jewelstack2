@@ -15,7 +15,7 @@ interface InvoiceGeneratorScreenProps {
     customers: Customer[];
 }
 
-const InvoiceGeneratorScreen: React.FC<InvoiceGeneratorScreenProps> = ({ orders, products, customers }) => {
+const InvoiceGeneratorScreen: React.FC<InvoiceGeneratorScreenProps> = ({ orders, products }) => {
     const [items, setItems] = useState<InvoiceItem[]>([]);
     const [itemName, setItemName] = useState('');
     const [itemQuantity, setItemQuantity] = useState('1');
@@ -77,17 +77,17 @@ const InvoiceGeneratorScreen: React.FC<InvoiceGeneratorScreenProps> = ({ orders,
 
 
     return (
-        <div className="bg-jewel-bg-dark p-4 rounded-lg shadow-lg text-white space-y-4 animate-fade-in">
-            <h1 className="text-xl font-bold text-jewel-gold">Generate Invoice</h1>
+        <div className="bg-brand-surface p-4 rounded-lg shadow-lg text-white space-y-4 animate-fade-in">
+            <h1 className="text-xl font-bold text-brand-gold">Generate Invoice</h1>
 
             <div className="space-y-4 text-sm">
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 bg-jewel-navy rounded-lg col-span-2">
-                        <label className="font-semibold text-gray-400">Link to Existing Order</label>
+                    <div className="p-3 bg-brand-dark rounded-lg col-span-2">
+                        <label className="font-semibold text-brand-text-secondary">Link to Existing Order</label>
                         <select
                             value={selectedOrderId}
                             onChange={(e) => setSelectedOrderId(e.target.value)}
-                            className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white"
+                            className="w-full bg-brand-surface border border-brand-border rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-brand-gold text-white"
                         >
                             <option value="">Manual Entry</option>
                             {orders.map(order => (
@@ -97,46 +97,46 @@ const InvoiceGeneratorScreen: React.FC<InvoiceGeneratorScreenProps> = ({ orders,
                             ))}
                         </select>
                     </div>
-                     <div className="p-3 bg-jewel-navy rounded-lg">
-                        <label className="font-semibold text-gray-400">Invoice Date</label>
-                        <input type="date" defaultValue={new Date().toISOString().split("T")[0]} className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white" />
+                     <div className="p-3 bg-brand-dark rounded-lg">
+                        <label className="font-semibold text-brand-text-secondary">Invoice Date</label>
+                        <input type="date" defaultValue={new Date().toISOString().split("T")[0]} className="w-full bg-brand-surface border border-brand-border rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-brand-gold text-white" />
                     </div>
-                    <div className="p-3 bg-jewel-navy rounded-lg">
-                        <label className="font-semibold text-gray-400">Due Date</label>
-                        <input type="date" className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white" />
+                    <div className="p-3 bg-brand-dark rounded-lg">
+                        <label className="font-semibold text-brand-text-secondary">Due Date</label>
+                        <input type="date" className="w-full bg-brand-surface border border-brand-border rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-brand-gold text-white" />
                     </div>
                 </div>
 
 
                 {/* Manual Item Entry */}
-                <div className="p-3 bg-jewel-navy rounded-lg">
-                    <h3 className="font-semibold text-gray-400 mb-2">Add Invoice Item</h3>
+                <div className="p-3 bg-brand-dark rounded-lg">
+                    <h3 className="font-semibold text-brand-text-secondary mb-2">Add Invoice Item</h3>
                     <div className="space-y-2">
-                        <input type="text" placeholder="Item Name" value={itemName} onChange={(e) => setItemName(e.target.value)} className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" disabled={!!selectedOrderId} />
+                        <input type="text" placeholder="Item Name" value={itemName} onChange={(e) => setItemName(e.target.value)} className="w-full bg-brand-surface border border-brand-border rounded p-2 focus:outline-none focus:ring-2 focus:ring-brand-gold text-white placeholder-brand-text-secondary" disabled={!!selectedOrderId} />
                         <div className="grid grid-cols-2 gap-2">
-                             <input type="number" placeholder="Qty" value={itemQuantity} onChange={(e) => setItemQuantity(e.target.value)} className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" disabled={!!selectedOrderId} />
-                             <input type="number" placeholder="Price per Item (₹)" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" disabled={!!selectedOrderId} />
+                             <input type="number" placeholder="Qty" value={itemQuantity} onChange={(e) => setItemQuantity(e.target.value)} className="w-full bg-brand-surface border border-brand-border rounded p-2 focus:outline-none focus:ring-2 focus:ring-brand-gold text-white placeholder-brand-text-secondary" disabled={!!selectedOrderId} />
+                             <input type="number" placeholder="Price per Item (₹)" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} className="w-full bg-brand-surface border border-brand-border rounded p-2 focus:outline-none focus:ring-2 focus:ring-brand-gold text-white placeholder-brand-text-secondary" disabled={!!selectedOrderId} />
                         </div>
-                        <button onClick={handleAddItem} className="w-full bg-jewel-gold/20 text-jewel-gold font-semibold py-2 rounded-lg hover:bg-jewel-gold/30 transition-colors disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed" disabled={!!selectedOrderId}>
+                        <button onClick={handleAddItem} className="w-full bg-brand-gold/20 text-brand-gold font-semibold py-2 rounded-lg hover:bg-brand-gold/30 transition-colors disabled:bg-brand-border disabled:text-brand-text-secondary disabled:cursor-not-allowed" disabled={!!selectedOrderId}>
                             + Add Item to Invoice
                         </button>
                     </div>
                 </div>
                 
                 {/* Items List */}
-                <div className="p-3 bg-jewel-navy rounded-lg">
-                    <h3 className="font-semibold text-gray-400 mb-2">Invoice Items</h3>
+                <div className="p-3 bg-brand-dark rounded-lg">
+                    <h3 className="font-semibold text-brand-text-secondary mb-2">Invoice Items</h3>
                      {items.length === 0 ? (
-                        <div className="text-center text-gray-500 border-2 border-dashed border-gray-600 p-4 rounded-lg">
+                        <div className="text-center text-brand-text-secondary border-2 border-dashed border-brand-border p-4 rounded-lg">
                             <p>No items added yet. Select an order or add items manually.</p>
                         </div>
                      ) : (
                         <div className="space-y-2">
                             {items.map(item => (
-                                <div key={item.id} className="bg-jewel-bg-dark p-2 rounded-lg flex justify-between items-center">
+                                <div key={item.id} className="bg-brand-surface p-2 rounded-lg flex justify-between items-center">
                                     <div>
                                         <p className="font-semibold">{item.name}</p>
-                                        <p className="text-xs text-gray-400">{item.quantity} x ₹{item.price.toLocaleString('en-IN')}</p>
+                                        <p className="text-xs text-brand-text-secondary">{item.quantity} x ₹{item.price.toLocaleString('en-IN')}</p>
                                     </div>
                                     <div className="flex items-center space-x-3">
                                         <p className="font-semibold">₹{(item.quantity * item.price).toLocaleString('en-IN')}</p>
@@ -144,15 +144,15 @@ const InvoiceGeneratorScreen: React.FC<InvoiceGeneratorScreenProps> = ({ orders,
                                     </div>
                                 </div>
                             ))}
-                             <div className="mt-4 pt-2 border-t border-jewel-gold/20 flex justify-between items-center">
+                             <div className="mt-4 pt-2 border-t border-brand-border/50 flex justify-between items-center">
                                 <span className="font-bold text-lg">Total:</span>
-                                <span className="font-bold text-xl text-jewel-gold">₹{totalAmount.toLocaleString('en-IN')}</span>
+                                <span className="font-bold text-xl text-brand-gold">₹{totalAmount.toLocaleString('en-IN')}</span>
                             </div>
                         </div>
                      )}
                 </div>
 
-                <button className="w-full bg-jewel-gold text-jewel-navy font-bold py-3 rounded-lg hover:bg-jewel-gold-dark transition-colors">
+                <button className="w-full bg-brand-gold text-brand-dark font-bold py-3 rounded-lg hover:bg-brand-gold-hover transition-colors">
                    Preview Invoice
                 </button>
             </div>

@@ -20,11 +20,16 @@
       theme: {
         extend: {
           colors: {
-            'jewel-navy': '#0F1C3F',
-            'jewel-gold': '#FFD700',
-            'jewel-gold-dark': '#d4b100',
-            'jewel-bg-dark': '#1C2B4E',
-            'jewel-red': '#EF4444',
+            'brand-dark': '#121212',
+            'brand-surface': '#1E1E1E',
+            'brand-border': '#3A3A3A',
+            'brand-gold': '#CCA43B',
+            'brand-gold-hover': '#B89335',
+            'brand-text-primary': '#E0E0E0',
+            'brand-text-secondary': '#8A8A8A',
+            'brand-success': '#10B981',
+            'brand-success-bg': 'rgba(16, 185, 129, 0.1)',
+            'brand-red': '#EF4444',
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
@@ -44,9 +49,24 @@
     .animate-fade-in {
         animation: fade-in 0.3s ease-out forwards;
     }
+    
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1E1E1E;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3A3A3A;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #CCA43B;
+    }
   </style>
 </head>
-<body class="bg-jewel-navy">
+<body class="bg-brand-dark">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

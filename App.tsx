@@ -8,20 +8,22 @@ import OrdersScreen from './screens/OrdersScreen';
 import MLInsightsScreen from './screens/MLInsightsScreen';
 import InvoiceGeneratorScreen from './screens/InvoiceGeneratorScreen';
 import SettingsModal from './components/SettingsModal';
-import { DashboardIcon, InventoryIcon, CustomersIcon, OrdersIcon, InsightsIcon, MenuIcon } from './components/Icons';
-import { Product, Order, Customer, OrderStatus, OrderItem } from './types';
+import OrderForm from './components/OrderForm';
+import { DashboardIcon, InventoryIcon, CustomersIcon, OrdersIcon, InsightsIcon, MenuIcon, BackIcon, MessageIcon } from './components/Icons';
+import { Product, Order, Customer, OrderStatus } from './types';
 import { mockProducts, mockOrders, mockCustomers } from './constants';
 
 type Screen = 'dashboard' | 'inventory' | 'customers' | 'orders' | 'insights' | 'invoice';
+type AppView = Screen | 'new-order';
 
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
+  const [activeScreen, setActiveScreen] = useState<AppView>('dashboard');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
   // --- CRUD Handlers ---
 
@@ -59,6 +61,7 @@ const App: React.FC = () => {
               avatarUrl: `https://i.pravatar.cc/150?img=${Date.now()}`,
               lastPurchase: new Date().toISOString().split('T')[0],
               totalOrders: 1,
+              phone: newCustomerData.phone,
           };
           updatedCustomers.push(newCustomer);
           setCustomers(updatedCustomers);
@@ -91,6 +94,7 @@ const App: React.FC = () => {
         );
       });
       setProducts(updatedProducts);
+      setActiveScreen('orders');
   };
   
   const handleUpdateOrderStatus = (orderId: string, status: OrderStatus) => {
@@ -124,9 +128,10 @@ const App: React.FC = () => {
       case 'dashboard': return <DashboardScreen orders={orders} products={products} />;
       case 'inventory': return <InventoryScreen products={products} onAddProduct={handleAddProduct} onUpdateProduct={handleUpdateProduct} onDeleteProduct={handleDeleteProduct} />;
       case 'customers': return <CustomersScreen customers={customers} orders={orders} />;
-      case 'orders': return <OrdersScreen orders={orders} customers={customers} products={products} onAddOrder={handleAddOrder} onUpdateStatus={handleUpdateOrderStatus} onDeleteOrder={handleDeleteOrder} />;
+      case 'orders': return <OrdersScreen orders={orders} onUpdateStatus={handleUpdateOrderStatus} onDeleteOrder={handleDeleteOrder} onNavigateToNewOrder={() => setActiveScreen('new-order')} />;
       case 'insights': return <MLInsightsScreen />;
       case 'invoice': return <InvoiceGeneratorScreen orders={orders} products={products} customers={customers} />;
+      case 'new-order': return <OrderForm customers={customers} products={products} onSave={handleAddOrder} onBack={() => setActiveScreen('orders')} />;
       default: return <DashboardScreen orders={orders} products={products} />;
     }
   };
@@ -140,18 +145,15 @@ const App: React.FC = () => {
   ];
 
   const getHeaderTitle = () => {
-    switch (activeScreen) {
-      case 'dashboard':
-        return 'JewelStack';
-      case 'invoice':
-        return 'Generate Invoice';
-      default:
-        return activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1);
-    }
+    if (activeScreen === 'dashboard') return 'JewelStack';
+    if (activeScreen === 'invoice') return 'Generate Invoice';
+    if (activeScreen === 'new-order') return 'New Order';
+    const screen = activeScreen as Screen;
+    return screen.charAt(0).toUpperCase() + screen.slice(1);
   };
 
   return (
-    <div className="min-h-screen bg-jewel-navy font-sans text-white">
+    <div className="min-h-screen bg-brand-dark font-sans text-brand-text-primary">
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
@@ -165,33 +167,50 @@ const App: React.FC = () => {
         }}
       />
       <div className="container mx-auto max-w-lg h-screen flex flex-col">
-        <header className="p-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-jewel-gold">{getHeaderTitle()}</h1>
-           <button onClick={() => setIsSettingsOpen(true)} className="p-2 -mr-2">
-                <MenuIcon className="h-6 w-6 text-white" />
-            </button>
+        <header className="p-4 flex justify-between items-center h-16 flex-shrink-0">
+          {activeScreen === 'new-order' ? (
+              <>
+                <button onClick={() => setActiveScreen('orders')} className="p-2 -ml-2 text-brand-text-primary">
+                    <BackIcon className="h-6 w-6" />
+                </button>
+                <h1 className="text-xl font-bold text-brand-text-primary">{getHeaderTitle()}</h1>
+                <div className="flex items-center space-x-2">
+                    <button className="p-2 -mr-2"><MessageIcon className="h-6 w-6 text-brand-text-primary" /></button>
+                    <button onClick={() => setIsSettingsOpen(true)} className="p-2 -mr-2"><MenuIcon className="h-6 w-6 text-brand-text-primary" /></button>
+                </div>
+              </>
+          ) : (
+             <>
+                <h1 className="text-2xl font-serif text-brand-gold">{getHeaderTitle()}</h1>
+                <button onClick={() => setIsSettingsOpen(true)} className="p-2 -mr-2">
+                    <MenuIcon className="h-6 w-6 text-brand-text-primary" />
+                </button>
+             </>
+          )}
         </header>
 
-        <main className="flex-grow p-4 overflow-y-auto pb-24">
+        <main className={`flex-grow p-4 overflow-y-auto ${activeScreen !== 'new-order' ? 'pb-24' : 'pb-4'}`}>
           {renderScreen()}
         </main>
         
-        <footer className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-jewel-bg-dark border-t border-jewel-gold/20">
-          <nav className="flex justify-around">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveScreen(item.id as Screen)}
-                className={`flex flex-col items-center justify-center w-full p-2 text-xs transition-colors ${
-                  activeScreen === item.id ? 'text-jewel-gold' : 'text-gray-400 hover:text-white'
-                }`}
-              >
-                <item.icon className="h-6 w-6 mb-1" />
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
-        </footer>
+        {activeScreen !== 'new-order' && (
+            <footer className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-brand-surface border-t border-brand-border">
+              <nav className="flex justify-around">
+                {navItems.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveScreen(item.id as Screen)}
+                    className={`flex flex-col items-center justify-center w-full py-2 text-xs transition-colors ${
+                      activeScreen === item.id ? 'text-brand-gold' : 'text-brand-text-secondary hover:text-brand-text-primary'
+                    }`}
+                  >
+                    <item.icon className="h-6 w-6 mb-1" />
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </footer>
+        )}
       </div>
     </div>
   );

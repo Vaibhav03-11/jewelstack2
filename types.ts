@@ -37,6 +37,10 @@ export interface Order {
   items: OrderItem[];
   total: number;
   status: OrderStatus;
+  estimatedDeliveryDate?: string;
+  liveGoldRate?: number;
+  balanceDue?: number;
+  advancePayment?: number;
 }
 
 export interface Customer {

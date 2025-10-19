@@ -1,71 +1,69 @@
-import React, { useState } from 'react';
-import { mockOrders } from '../constants';
-import { OrderStatus, Purity } from '../types';
 
-const OrderStatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
+import React, { useState } from 'react';
+import { Order, OrderStatus, Product, Customer } from '../types';
+import { OrdersIcon, TrashIcon } from '../components/Icons';
+import OrderForm from '../components/OrderForm';
+
+interface OrdersScreenProps {
+    orders: Order[];
+    customers: Customer[];
+    products: Product[];
+    onAddOrder: (orderData: Omit<Order, 'id' | 'total'>, newCustomer?: Omit<Customer, 'id' | 'avatarUrl' | 'lastPurchase' | 'totalOrders'>) => void;
+    onUpdateStatus: (orderId: string, status: OrderStatus) => void;
+    onDeleteOrder: (orderId: string) => void;
+}
+
+const OrderStatusBadge: React.FC<{ status: OrderStatus, orderId: string, onUpdateStatus: (orderId: string, status: OrderStatus) => void }> = ({ status, orderId, onUpdateStatus }) => {
     const statusStyles = {
         [OrderStatus.Delivered]: 'bg-green-900 text-green-300',
         [OrderStatus.Pending]: 'bg-yellow-900 text-yellow-300',
         [OrderStatus.Shipped]: 'bg-blue-900 text-blue-300',
     };
+    
+    const nextStatus = {
+        [OrderStatus.Pending]: OrderStatus.Shipped,
+        [OrderStatus.Shipped]: OrderStatus.Delivered,
+        [OrderStatus.Delivered]: OrderStatus.Delivered,
+    }
+
+    const handleStatusClick = () => {
+        if (status !== OrderStatus.Delivered) {
+             onUpdateStatus(orderId, nextStatus[status]);
+        }
+    }
+
     return (
-        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusStyles[status]}`}>
+        <button onClick={handleStatusClick} title={status !== OrderStatus.Delivered ? `Click to change to ${nextStatus[status]}` : ''}
+          className={`px-2 py-1 text-xs font-semibold rounded-full ${statusStyles[status]} ${status !== OrderStatus.Delivered ? 'cursor-pointer hover:opacity-80' : ''}`}>
             {status}
-        </span>
+        </button>
     );
 };
 
-const NewOrderForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    return (
-        <div className="bg-jewel-bg-dark p-4 rounded-lg shadow-lg animate-fade-in text-white">
-            <div className="flex justify-between items-center mb-4">
-                 <h2 className="text-xl font-bold text-jewel-gold">New Order</h2>
-                 <button onClick={onBack} className="text-xl font-bold text-gray-400">&times;</button>
-            </div>
-           
-            <div className="space-y-4 text-sm">
-                <div className="p-3 bg-jewel-navy rounded-lg">
-                    <label className="font-semibold text-gray-400">Customer Name</label>
-                    <input type="text" placeholder="Link Existing Customer" className="w-full bg-jewel-bg-dark border border-jewel-gold rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" />
-                </div>
-                <div className="p-3 bg-jewel-navy rounded-lg">
-                    <label className="font-semibold text-gray-400">Purity</label>
-                    <div className="flex space-x-2 mt-2">
-                        <button className="flex-1 bg-jewel-gold text-jewel-navy py-2 rounded font-semibold">18K Gold</button>
-                        <button className="flex-1 bg-gray-700 text-white py-2 rounded font-semibold">24K Gold</button>
-                    </div>
-                </div>
-                 <div className="p-3 bg-jewel-navy rounded-lg space-y-2">
-                    <label className="font-semibold text-gray-400">Item Details</label>
-                    <input type="text" placeholder="Type of Ornament" className="w-full bg-jewel-bg-dark border border-jewel-gold rounded p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" />
-                    <input type="text" placeholder="Weight (grams)" className="w-full bg-jewel-bg-dark border border-jewel-gold rounded p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" />
-                    <textarea placeholder="Custom Description" className="w-full bg-jewel-bg-dark border border-jewel-gold rounded p-2 h-20 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500"></textarea>
-                </div>
-                 <div className="p-3 bg-jewel-navy rounded-lg">
-                    <label className="font-semibold text-gray-400">Dates</label>
-                    <input type="date" placeholder="Estimated Delivery Date" className="w-full bg-jewel-bg-dark border border-jewel-gold rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" />
-                </div>
-                 <div className="p-3 bg-jewel-navy rounded-lg space-y-2">
-                    <h3 className="font-semibold text-gray-400">Payment History</h3>
-                    <input type="number" placeholder="Advance Payment (₹)" className="w-full bg-jewel-bg-dark border border-jewel-gold rounded p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white placeholder-gray-500" />
-                    <p className="text-right font-semibold text-lg">Total Amount (₹): <span className="text-jewel-gold">0.00</span></p>
-                </div>
-                <button className="w-full bg-jewel-gold text-jewel-navy font-bold py-3 rounded-lg hover:bg-jewel-gold-dark transition-colors">
-                   Confirm Order
-                </button>
-            </div>
-        </div>
-    );
-}
-
-const OrdersScreen: React.FC = () => {
+const OrdersScreen: React.FC<OrdersScreenProps> = ({ orders, customers, products, onAddOrder, onUpdateStatus, onDeleteOrder }) => {
     const [showNewOrderForm, setShowNewOrderForm] = useState(false);
+    const [activeFilter, setActiveFilter] = useState('All');
 
-    if(showNewOrderForm) {
-        return <NewOrderForm onBack={() => setShowNewOrderForm(false)} />
+    const handleSaveOrder = (
+        orderData: Omit<Order, 'id' | 'total'>,
+        newCustomerData?: Omit<Customer, 'id' | 'avatarUrl' | 'lastPurchase' | 'totalOrders'>
+    ) => {
+        onAddOrder(orderData, newCustomerData);
+        setShowNewOrderForm(false);
+    };
+
+    if (showNewOrderForm) {
+        return <OrderForm customers={customers} products={products} onSave={handleSaveOrder} onBack={() => setShowNewOrderForm(false)} />
     }
+    
+    const filteredOrders = orders.filter(order => {
+        if (activeFilter === 'All') return true;
+        if (activeFilter === 'Pending') return order.status === OrderStatus.Pending;
+        if (activeFilter === 'Completed') return order.status === OrderStatus.Delivered;
+        return true;
+    });
 
-  return (
+    return (
     <div className="space-y-4">
         <div className="flex justify-between items-center">
              <h1 className="text-xl font-bold text-white">Orders</h1>
@@ -74,27 +72,38 @@ const OrdersScreen: React.FC = () => {
               </button>
         </div>
       <div className="flex space-x-2 border-b border-gray-700">
-          <button className="py-2 px-4 text-sm font-medium border-b-2 border-jewel-gold text-jewel-gold">All Orders</button>
-          <button className="py-2 px-4 text-sm font-medium text-gray-400">Pending</button>
-          <button className="py-2 px-4 text-sm font-medium text-gray-400">Completed</button>
+          <button onClick={() => setActiveFilter('All')} className={`py-2 px-4 text-sm font-medium ${activeFilter === 'All' ? 'border-b-2 border-jewel-gold text-jewel-gold' : 'text-gray-400'}`}>All Orders</button>
+          <button onClick={() => setActiveFilter('Pending')} className={`py-2 px-4 text-sm font-medium ${activeFilter === 'Pending' ? 'border-b-2 border-jewel-gold text-jewel-gold' : 'text-gray-400'}`}>Pending</button>
+          <button onClick={() => setActiveFilter('Completed')} className={`py-2 px-4 text-sm font-medium ${activeFilter === 'Completed' ? 'border-b-2 border-jewel-gold text-jewel-gold' : 'text-gray-400'}`}>Completed</button>
       </div>
 
       <div className="space-y-3">
-        {mockOrders.map(order => (
-          <div key={order.id} className="bg-jewel-bg-dark text-white p-4 rounded-lg shadow-md">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-bold">Order #{order.id}</p>
-                <p className="text-sm text-gray-400">{order.customerName}</p>
-                <p className="text-xs text-gray-500">{order.date}</p>
-              </div>
-              <OrderStatusBadge status={order.status} />
+        {filteredOrders.length > 0 ? (
+          filteredOrders.map(order => (
+            <div key={order.id} className="bg-jewel-bg-dark text-white p-4 rounded-lg shadow-md">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <p className="font-bold">Order #{order.id}</p>
+                        <p className="text-sm text-gray-400">{order.customerName}</p>
+                        <p className="text-xs text-gray-500">{new Date(order.date).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                        <OrderStatusBadge status={order.status} orderId={order.id} onUpdateStatus={onUpdateStatus} />
+                        <button onClick={() => onDeleteOrder(order.id)} className="p-1 text-gray-400 hover:text-jewel-red"><TrashIcon className="h-4 w-4" /></button>
+                    </div>
+                </div>
+                <div className="mt-2 pt-2 border-t border-gray-700 text-right">
+                <span className="font-semibold text-jewel-gold">Total: ₹{order.total.toLocaleString('en-IN')}</span>
+                </div>
             </div>
-            <div className="mt-2 pt-2 border-t border-gray-700 text-right">
-              <span className="font-semibold text-jewel-gold">Total: ₹{order.total.toLocaleString('en-IN')}</span>
+          ))
+        ) : (
+             <div className="bg-jewel-bg-dark p-8 rounded-lg text-center text-gray-400 border border-white/10 flex flex-col items-center">
+                <OrdersIcon className="h-12 w-12 text-gray-500 mb-4" />
+                <p className="font-semibold text-white">No orders for this filter.</p>
+                <p className="text-sm mt-1">Click the '+ New Order' button to create one.</p>
             </div>
-          </div>
-        ))}
+        )}
       </div>
     </div>
   );

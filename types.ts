@@ -23,10 +23,18 @@ export interface Product {
   imageUrl: string;
 }
 
+export interface OrderItem {
+  productId: number;
+  quantity: number;
+  pricePerItem: number;
+}
+
 export interface Order {
   id: string;
+  customerId: number;
   customerName: string;
   date: string;
+  items: OrderItem[];
   total: number;
   status: OrderStatus;
 }
@@ -37,4 +45,6 @@ export interface Customer {
   avatarUrl: string;
   lastPurchase: string;
   totalOrders: number;
+  phone?: string;
+  email?: string;
 }

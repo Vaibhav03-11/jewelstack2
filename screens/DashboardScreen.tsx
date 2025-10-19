@@ -1,7 +1,12 @@
+
 import React, { useState } from 'react';
-import { mockOrders } from '../constants';
-import { OrderStatus } from '../types';
+import { Order, OrderStatus, Product } from '../types';
 import { RupeeIcon, BoxIcon, EditIcon, CalendarIcon } from '../components/Icons';
+
+interface DashboardScreenProps {
+    orders: Order[];
+    products: Product[];
+}
 
 const MetricCard: React.FC<{ title: string; value: string; icon: React.ReactNode; colorClass: string }> = ({ title, value, icon, colorClass }) => (
   <div className={`p-4 rounded-xl shadow-lg flex-1 bg-jewel-bg-dark text-white relative overflow-hidden border border-white/10`}>
@@ -45,8 +50,8 @@ const GoldRateCard = () => {
     );
 };
 
-const UpcomingDeliveries = () => {
-    const upcomingOrders = mockOrders.filter(o => o.status !== OrderStatus.Delivered);
+const UpcomingDeliveries: React.FC<{orders: Order[]}> = ({ orders }) => {
+    const upcomingOrders = orders.filter(o => o.status !== OrderStatus.Delivered);
 
     return (
         <div>
@@ -65,15 +70,15 @@ const UpcomingDeliveries = () => {
                          </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-white">{order.date}</p>
+                        <p className="font-semibold text-white">{new Date(order.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
                          <OrderStatusBadge status={order.status} />
                       </div>
                     </div>
                   ))}
                 </div>
             ) : (
-                <div className="bg-jewel-bg-dark p-4 rounded-lg text-center text-gray-400">
-                    <p>No upcoming deliveries.</p>
+                <div className="bg-jewel-bg-dark p-4 rounded-lg text-center text-gray-400 border border-white/10">
+                    <p>No upcoming deliveries or reminders.</p>
                 </div>
             )}
         </div>
@@ -93,26 +98,35 @@ const OrderStatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
     );
 };
 
-const DashboardScreen: React.FC = () => {
+const DashboardScreen: React.FC<DashboardScreenProps> = ({ orders, products }) => {
+  const today = new Date().toISOString().split('T')[0];
+  const dailySales = orders
+    .filter(o => o.date === today && o.status === OrderStatus.Delivered)
+    .reduce((sum, order) => sum + order.total, 0);
+  
+  const lowStockItems = products.filter(p => p.stock > 0 && p.stock < 5).length;
+  const totalInventoryValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+  const recentOrders = orders.slice(0, 3);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
-        <MetricCard title="Daily Sales" value="₹1,35,000" icon={<RupeeIcon />} colorClass="text-green-400" />
-        <MetricCard title="Low Stock Items" value="12" icon={<BoxIcon />} colorClass="text-jewel-red" />
+        <MetricCard title="Daily Sales" value={`₹${dailySales.toLocaleString('en-IN')}`} icon={<RupeeIcon />} colorClass="text-green-400" />
+        <MetricCard title="Low Stock Items" value={lowStockItems.toString()} icon={<BoxIcon />} colorClass="text-jewel-red" />
         <GoldRateCard />
       </div>
       
-      <UpcomingDeliveries />
+      <UpcomingDeliveries orders={orders} />
 
       <div className="bg-jewel-bg-dark p-4 rounded-xl shadow-lg text-white border border-white/10">
-        <h3 className="text-sm text-gray-400">Profit/Loss Summary</h3>
-        <p className="text-lg font-bold">Inventory Valuation Change: <span className="text-green-400"> +₹45,200 (+2.1%)</span></p>
+        <h3 className="text-sm text-gray-400">Total Inventory Value</h3>
+        <p className="text-lg font-bold">₹{totalInventoryValue.toLocaleString('en-IN')}</p>
       </div>
 
       <div>
         <h2 className="text-lg font-bold text-white mb-2">Recent Order History</h2>
         <div className="space-y-3">
-          {mockOrders.map(order => (
+          {recentOrders.length > 0 ? recentOrders.map(order => (
             <div key={order.id} className="bg-jewel-bg-dark p-3 rounded-lg shadow-md flex items-center justify-between">
               <div className="flex items-center space-x-3">
                  <img src={`https://picsum.photos/seed/${order.id}/50`} alt="item" className="w-12 h-12 rounded-md object-cover" />
@@ -123,7 +137,11 @@ const DashboardScreen: React.FC = () => {
               </div>
               <OrderStatusBadge status={order.status} />
             </div>
-          ))}
+          )) : (
+             <div className="bg-jewel-bg-dark p-4 rounded-lg text-center text-gray-400 border border-white/10">
+                <p>No recent orders to display.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

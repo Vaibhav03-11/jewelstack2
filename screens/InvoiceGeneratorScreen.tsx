@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { mockOrders, mockProducts } from '../constants';
-import { Order, Product } from '../types';
+import { Order, Product, Customer } from '../types';
 
 interface InvoiceItem {
   id: number;
@@ -9,16 +9,13 @@ interface InvoiceItem {
   price: number;
 }
 
-// A simple mock mapping to link an order to a product for this demo
-const orderToProductMap: { [key: string]: number } = {
-    'JS-1024': 2, // Elegant Diamond Ring
-    'JS-1023': 3, // Royal Ruby Necklace
-    'JS-1022': 1, // Classic Gold Bangle
-    'JS-1025': 5, // Studded Earrings
-};
+interface InvoiceGeneratorScreenProps {
+    orders: Order[];
+    products: Product[];
+    customers: Customer[];
+}
 
-
-const InvoiceGeneratorScreen: React.FC = () => {
+const InvoiceGeneratorScreen: React.FC<InvoiceGeneratorScreenProps> = ({ orders, products, customers }) => {
     const [items, setItems] = useState<InvoiceItem[]>([]);
     const [itemName, setItemName] = useState('');
     const [itemQuantity, setItemQuantity] = useState('1');
@@ -33,23 +30,24 @@ const InvoiceGeneratorScreen: React.FC = () => {
     }, [items]);
 
     useEffect(() => {
-        if (selectedOrderId && orderToProductMap[selectedOrderId]) {
-            const productId = orderToProductMap[selectedOrderId];
-            const product = mockProducts.find(p => p.id === productId);
-
-            if (product) {
-                const newItem: InvoiceItem = {
-                    id: product.id,
-                    name: product.name,
-                    quantity: 1,
-                    price: product.price,
-                };
-                setItems([newItem]);
+        if (selectedOrderId) {
+            const order = orders.find(o => o.id === selectedOrderId);
+            if (order) {
+                const invoiceItems = order.items.map(item => {
+                    const product = products.find(p => p.id === item.productId);
+                    return {
+                        id: item.productId,
+                        name: product?.name || 'Unknown Product',
+                        quantity: item.quantity,
+                        price: item.pricePerItem,
+                    };
+                });
+                setItems(invoiceItems);
             }
         } else {
             setItems([]);
         }
-    }, [selectedOrderId]);
+    }, [selectedOrderId, orders, products]);
 
 
     const handleAddItem = () => {
@@ -92,7 +90,7 @@ const InvoiceGeneratorScreen: React.FC = () => {
                             className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white"
                         >
                             <option value="">Manual Entry</option>
-                            {mockOrders.map(order => (
+                            {orders.map(order => (
                                 <option key={order.id} value={order.id}>
                                     {order.id} - {order.customerName}
                                 </option>
@@ -101,7 +99,7 @@ const InvoiceGeneratorScreen: React.FC = () => {
                     </div>
                      <div className="p-3 bg-jewel-navy rounded-lg">
                         <label className="font-semibold text-gray-400">Invoice Date</label>
-                        <input type="date" className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white" />
+                        <input type="date" defaultValue={new Date().toISOString().split("T")[0]} className="w-full bg-jewel-bg-dark border border-jewel-gold/50 rounded mt-1 p-2 focus:outline-none focus:ring-2 focus:ring-jewel-gold text-white" />
                     </div>
                     <div className="p-3 bg-jewel-navy rounded-lg">
                         <label className="font-semibold text-gray-400">Due Date</label>
